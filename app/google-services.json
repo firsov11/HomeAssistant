@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "243669581767",
+    "project_id": "homeassistant-dd152",
+    "storage_bucket": "homeassistant-dd152.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:243669581767:android:4547d5e3b9190efa6863e2",
+        "android_client_info": {
+          "package_name": "com.firsov.homeassistant"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBY0N77G7uP8b_bABwZQ5Zjo_eNSG3PxcE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

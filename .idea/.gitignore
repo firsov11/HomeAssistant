@@ -1,0 +1,44 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+# Android/IntelliJ
+.idea/
+*.iml
+.gradle/
+local.properties
+.DS_Store
+/build/
+captures/
+.externalNativeBuild/
+
+# Kotlin/Java
+*.class
+*.jar
+*.war
+*.ear
+
+# Log/Temporary files
+*.log
+*.tmp
+
+# Keystore files (никогда не коммить!)
+*.jks
+*.keystore
+
+# Firebase
+google-services.json
+firebase-debug.log
+
+# Crashlytics/Analytics
+crashlytics-build.properties
+
+# NDK
+obj/
+
+# Mac/Linux/Windows OS files
+*.swp
+*~
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
