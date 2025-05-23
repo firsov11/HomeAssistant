@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "243669581767",
+    "firebase_url": "https://homeassistant-dd152-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "homeassistant-dd152",
     "storage_bucket": "homeassistant-dd152.firebasestorage.app"
   },
