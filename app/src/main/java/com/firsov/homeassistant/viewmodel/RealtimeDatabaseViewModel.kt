@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 class RealtimeDatabaseViewModel : ViewModel() {
-    private val dbRef = FirebaseDatabase.getInstance().getReference("devices")
+    private val dbRef = FirebaseDatabase.getInstance().getReference("presence_logs")
     private val _devices = MutableStateFlow<List<DeviceData>>(emptyList())
     val devices: StateFlow<List<DeviceData>> get() = _devices
 
@@ -16,16 +16,25 @@ class RealtimeDatabaseViewModel : ViewModel() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val list = mutableListOf<DeviceData>()
                 for (deviceSnapshot in snapshot.children) {
-                    val id = deviceSnapshot.key ?: continue
-                    val status = deviceSnapshot.child("status").getValue(String::class.java) ?: "unknown"
-                    val temp = deviceSnapshot.child("temperature").getValue(Double::class.java) ?: 0.0
-                    list.add(DeviceData(id, status, temp))
+                    val device_id = deviceSnapshot.child("device_id").getValue(String::class.java) ?: continue
+                    val human_time = deviceSnapshot.child("human_time").getValue(String::class.java) ?: ""
+                    val presence = deviceSnapshot.child("presence").getValue(Boolean::class.java) ?: false
+                    val timestamp = deviceSnapshot.child("timestamp").getValue(Long::class.java) ?: 0L
+
+                    list.add(
+                        DeviceData(
+                            device_id = device_id,
+                            human_time = human_time,
+                            presence = presence,
+                            number = timestamp
+                        )
+                    )
                 }
                 _devices.value = list
             }
 
             override fun onCancelled(error: DatabaseError) {
-                // handle error if needed
+                // Логирование или обработка ошибки при необходимости
             }
         })
     }

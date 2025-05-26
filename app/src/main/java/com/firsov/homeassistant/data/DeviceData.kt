@@ -1,5 +1,7 @@
 data class DeviceData(
-    val id: String = "",
-    val status: String = "",
-    val temperature: Double = 0.0
+    val device_id: String = "",
+    val human_time: String = "",
+    val presence: Boolean = false,
+    val number: Long = 0L
 )
+

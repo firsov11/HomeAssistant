@@ -38,14 +38,15 @@ fun DeviceCard(device: DeviceData) {
             .fillMaxWidth()
             .padding(vertical = 8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (device.status == "online") MaterialTheme.colorScheme.primaryContainer
+            containerColor = if (device.human_time == "online") MaterialTheme.colorScheme.primaryContainer
             else MaterialTheme.colorScheme.errorContainer
         )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("ID: ${device.id}", style = MaterialTheme.typography.titleMedium)
-            Text("Status: ${device.status}")
-            Text("Temperature: ${device.temperature}°C")
+            Text("ID: ${device.device_id}", style = MaterialTheme.typography.titleMedium)
+            Text("Время: ${device.human_time}")
+            Text("Присутствие: ${device.presence}")
+            Text("Номер: ${device.number}")
         }
     }
 }
