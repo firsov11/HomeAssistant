@@ -1,10 +1,14 @@
 package com.firsov.homeassistant
 
-import DevicesScreen
+import AppNavigation
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.firsov.homeassistant.ui.screens.SendDeviceDataScreen
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
+import androidx.navigation.compose.rememberNavController
 import com.firsov.homeassistant.ui.theme.HomeAssistantTheme
 
 class MainActivity : ComponentActivity() {
@@ -12,7 +16,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             HomeAssistantTheme {
-                DevicesScreen()
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    val navController = rememberNavController()
+                    AppNavigation(navController)
+                }
             }
         }
     }

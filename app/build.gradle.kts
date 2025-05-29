@@ -51,6 +51,8 @@ dependencies {
     implementation(libs.androidx.work)
     implementation(libs.accompanist.navigation.animation)
     implementation(libs.material)
+    implementation(libs.androidx.material.icons.extended)
+
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

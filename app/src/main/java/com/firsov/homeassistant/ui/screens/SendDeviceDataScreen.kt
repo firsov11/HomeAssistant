@@ -1,84 +1,64 @@
-package com.firsov.homeassistant.ui.screens
-
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ServerValue
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SendDeviceDataScreen() {
-    var deviceId by remember { mutableStateOf("") }
-    var status by remember { mutableStateOf("") }
-    var temperature by remember { mutableStateOf("") }
-    var message by remember { mutableStateOf("") }
+    val databaseRef = FirebaseDatabase.getInstance().getReference("presence_logs")
 
-    val dbRef = Firebase.database.reference
+    var deviceId by remember { mutableStateOf("RadarTest") }
+    var presence by remember { mutableStateOf(true) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        OutlinedTextField(
-            value = deviceId,
-            onValueChange = { deviceId = it },
-            label = { Text("Device ID (например, esp32_1)") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        OutlinedTextField(
-            value = status,
-            onValueChange = { status = it },
-            label = { Text("Status (online/offline)") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        OutlinedTextField(
-            value = temperature,
-            onValueChange = { temperature = it },
-            label = { Text("Temperature") },
-            keyboardOptions = KeyboardOptions.Default.copy(
-                keyboardType = KeyboardType.Number
-            ),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Button(
-            onClick = {
-                val temp = temperature.toDoubleOrNull()
-                if (deviceId.isNotBlank() && status.isNotBlank() && temp != null) {
-                    val data = mapOf(
-                        "status" to status,
-                        "temperature" to temp
-                    )
-                    dbRef.child("devices").child(deviceId).setValue(data)
-                        .addOnSuccessListener {
-                            message = "Данные успешно отправлены!"
-                        }
-                        .addOnFailureListener {
-                            message = "Ошибка отправки: ${it.message}"
-                        }
-                } else {
-                    message = "Проверь правильность ввода."
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Отправить в RTDB")
+    Scaffold(
+        topBar = {
+            TopAppBar(title = { Text("Отправка тестовых данных") })
         }
-
-        if (message.isNotBlank()) {
-            Text(
-                text = message,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(top = 8.dp)
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .padding(16.dp)
+        ) {
+            OutlinedTextField(
+                value = deviceId,
+                onValueChange = { deviceId = it },
+                label = { Text("ID устройства") },
+                modifier = Modifier.fillMaxWidth()
             )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                Text("Присутствие:")
+                Spacer(Modifier.width(8.dp))
+                Switch(
+                    checked = presence,
+                    onCheckedChange = { presence = it }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    val deviceData = mapOf(
+                        "device_id" to deviceId,
+                        "presence" to presence,
+                        "type" to "RADAR",
+                        "timestamp" to ServerValue.TIMESTAMP
+                    )
+
+                    databaseRef.push().setValue(deviceData)
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("📤 Отправить в Firebase")
+            }
         }
     }
 }
