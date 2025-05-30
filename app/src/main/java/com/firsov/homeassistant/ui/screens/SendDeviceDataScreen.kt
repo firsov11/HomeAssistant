@@ -2,17 +2,21 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ServerValue
+import android.widget.Toast
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SendDeviceDataScreen() {
     val databaseRef = FirebaseDatabase.getInstance().getReference("presence_logs")
+    val context = LocalContext.current
 
-    var deviceId by remember { mutableStateOf("RadarTest") }
-    var presence by remember { mutableStateOf(true) }
+    var deviceId by remember { mutableStateOf("SensorTest") }
+    var temperature by remember { mutableStateOf("") }
+    var humidity by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -33,27 +37,44 @@ fun SendDeviceDataScreen() {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                Text("Присутствие:")
-                Spacer(Modifier.width(8.dp))
-                Switch(
-                    checked = presence,
-                    onCheckedChange = { presence = it }
-                )
-            }
+            OutlinedTextField(
+                value = temperature,
+                onValueChange = { temperature = it },
+                label = { Text("Температура (°C)") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedTextField(
+                value = humidity,
+                onValueChange = { humidity = it },
+                label = { Text("Влажность (%)") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
                 onClick = {
-                    val deviceData = mapOf(
-                        "device_id" to deviceId,
-                        "presence" to presence,
-                        "type" to "RADAR",
-                        "timestamp" to ServerValue.TIMESTAMP
-                    )
+                    val tempValue = temperature.toDoubleOrNull()
+                    val humValue = humidity.toDoubleOrNull()
 
-                    databaseRef.push().setValue(deviceData)
+                    if (tempValue != null && humValue != null) {
+                        val deviceData = mapOf(
+                            "device_id" to deviceId,
+                            "temperature" to tempValue,
+                            "humidity" to humValue,
+                            "type" to "TEMPERATURE_HUMIDITY",
+                            "timestamp" to ServerValue.TIMESTAMP
+                        )
+                        databaseRef.push().setValue(deviceData)
+                        Toast.makeText(context, "✅ Данные отправлены", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, "⚠️ Введите корректные значения", Toast.LENGTH_SHORT).show()
+                    }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {

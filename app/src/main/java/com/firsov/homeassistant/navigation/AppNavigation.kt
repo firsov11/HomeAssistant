@@ -15,6 +15,7 @@ fun AppNavigation(navController: NavHostController, modifier: Modifier = Modifie
         composable("home") { HomeScreen(navController = navController, hasPresence = true) // или false
         }
         composable("devices") { DevicesScreen() }
+        composable("sensor") { SensorScreen() }
     }
 }
 

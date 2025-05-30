@@ -12,6 +12,7 @@ import com.google.firebase.database.FirebaseDatabase
 import androidx.compose.ui.Alignment
 import androidx.compose.material.icons.filled.Sensors
 import androidx.compose.material.icons.outlined.SensorsOff
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.material3.ExperimentalMaterial3Api
 
@@ -21,7 +22,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 @Composable
 fun DevicesScreen(viewModel: RealtimeDatabaseViewModel = viewModel()) {
     val devices by viewModel.devices.collectAsState()
-    val radarDevices = devices.filter { it.device_id == "Radar" }
+    val radarDevices = devices.filter { it.type == DeviceType.RADAR }
 
     var radarEnabled by remember { mutableStateOf(true) }
 
@@ -115,16 +116,31 @@ fun DeviceCard(device: DeviceData) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(vertical = 6.dp),
         color = containerColor,
         contentColor = contentColor,
-        shape = RoundedCornerShape(12.dp),
-        tonalElevation = 2.dp
+        shape = RoundedCornerShape(16.dp),
+        tonalElevation = 3.dp
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text("📟 ID: ${device.device_id}", style = MaterialTheme.typography.titleMedium)
-            Text("👤 Присутствие: ${if (device.presence) "Да" else "Нет"}")
-            Text("🕒 Время: ${device.human_time}")
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            InfoRow(
+                icon = Icons.Default.QrCode2,
+                iconColor = colorScheme.primary,
+                text = "ID: ${device.device_id}"
+            )
+            InfoRow(
+                icon = if (device.presence) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                iconColor = if (device.presence) colorScheme.primary else colorScheme.outline,
+                text = "Присутствие: ${if (device.presence) "Да" else "Нет"}"
+            )
+            InfoRow(
+                icon = Icons.Default.AccessTime,
+                iconColor = colorScheme.outline,
+                text = device.human_time
+            )
         }
     }
 }

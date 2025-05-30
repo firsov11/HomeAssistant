@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -44,15 +45,20 @@ fun HomeScreen(navController: NavController, hasPresence: Boolean) {
                     SquareButton(
                         text = "Радар",
                         size = squareSize,
-                        iconEmoji = if (hasPresence) "🔴" else "\uD83D\uDFE2"
+                        iconEmoji = if (hasPresence) "👁️‍🗨️" else "👁️"
                     ) {
                         navController.navigate("devices")
                     }
 
-                    SquareButton("Кнопка 2", squareSize) {
-                        // TODO
+                    SquareButton(
+                        text = "AHT20",
+                        size = squareSize,
+                        iconEmoji = "🌡️"
+                    ) {
+                        navController.navigate("sensor")
                     }
                 }
+
                 Row(modifier = Modifier.fillMaxWidth()) {
                     SquareButton("Кнопка 3", squareSize) {
                         // TODO
@@ -76,6 +82,10 @@ fun HomeScreen(navController: NavController, hasPresence: Boolean) {
 }
 
 
+
+
+
+
 @Composable
 fun SquareButton(
     text: String,
@@ -88,7 +98,8 @@ fun SquareButton(
         modifier = Modifier
             .width(size)
             .height(size)
-            .padding(4.dp)
+            .padding(4.dp),
+        shape = RoundedCornerShape(12.dp) // скруглённые углы
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             if (iconEmoji != null) {
@@ -98,4 +109,7 @@ fun SquareButton(
         }
     }
 }
+
+
+
 

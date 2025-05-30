@@ -24,12 +24,14 @@ class RealtimeDatabaseViewModel : ViewModel() {
                 for (deviceSnapshot in snapshot.children) {
                     val deviceId = deviceSnapshot.child("device_id").getValue(String::class.java) ?: continue
 
-                    val typeString = deviceSnapshot.child("type").getValue(String::class.java) ?: "RADAR"
+                    val typeString = deviceSnapshot.child("type").getValue(String::class.java) ?: continue
+
                     val type = try {
                         DeviceType.valueOf(typeString.uppercase())
                     } catch (e: IllegalArgumentException) {
-                        DeviceType.RADAR
+                        continue // некорректный тип — пропускаем
                     }
+
 
                     val presence = deviceSnapshot.child("presence").getValue(Boolean::class.java) ?: false
                     val temperature = deviceSnapshot.child("temperature").getValue(Float::class.java)

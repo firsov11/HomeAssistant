@@ -1,5 +1,5 @@
 enum class DeviceType {
     RADAR,
-    TEMPERATURE_HUMIDITY,
+    TEMPERATURE_HUMIDITY ,
     // Можно добавлять новые типы
 }
