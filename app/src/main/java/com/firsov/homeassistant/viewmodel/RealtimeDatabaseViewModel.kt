@@ -36,6 +36,7 @@ class RealtimeDatabaseViewModel : ViewModel() {
                     val presence = deviceSnapshot.child("presence").getValue(Boolean::class.java) ?: false
                     val temperature = deviceSnapshot.child("temperature").getValue(Float::class.java)
                     val humidity = deviceSnapshot.child("humidity").getValue(Float::class.java)
+                    val pressure = deviceSnapshot.child("pressure").getValue(Float::class.java)
 
                     // Получаем и форматируем timestamp
                     val timestamp = deviceSnapshot.child("timestamp").getValue(Long::class.java) ?: 0L
@@ -71,6 +72,7 @@ class RealtimeDatabaseViewModel : ViewModel() {
                         presence = presence,
                         temperature = temperature,
                         humidity = humidity,
+                        pressure = pressure,
                         type = type,
                         human_time = humanTime
                     )

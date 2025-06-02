@@ -1,3 +1,9 @@
+package com.firsov.homeassistant.ui.screens
+
+import DeviceData
+import DeviceType
+import InfoRow
+import RealtimeDatabaseViewModel
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,8 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.QrCode2
-import androidx.compose.material.icons.filled.Thermostat
-import androidx.compose.material.icons.filled.WaterDrop
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -32,16 +37,16 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SensorScreen(viewModel: RealtimeDatabaseViewModel = viewModel()) {
+fun SensorPressureScreen(viewModel: RealtimeDatabaseViewModel = viewModel()) {
     val devices by viewModel.devices.collectAsState()
     val sensorDevices = devices
-        .filter { it.type == DeviceType.TEMPERATURE_HUMIDITY }
+        .filter { it.type == DeviceType.PRESSURE }
         .sortedByDescending { it.human_time }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("AHT20 devices") }
+                title = { Text("BME280 devices") }
             )
         }
     ) { padding ->
@@ -83,27 +88,9 @@ fun SensorCard(device: DeviceData) {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             InfoRow(icon = Icons.Filled.QrCode2, iconColor = colorScheme.primary, text = "ID: ${device.device_id}")
-            InfoRow(icon = Icons.Filled.Thermostat, iconColor = colorScheme.primary, text = "Температура: ${device.temperature} °C")
-            InfoRow(icon = Icons.Filled.WaterDrop, iconColor = colorScheme.primary, text = "Влажность: ${device.humidity} %")
+            InfoRow(icon = Icons.Filled.Speed, iconColor = colorScheme.primary, text = "Атмосферное давление: ${device.pressure} мм рт. ст.")
             InfoRow(icon = Icons.Filled.AccessTime, iconColor = colorScheme.primary, text = device.human_time)
         }
-    }
-}
-
-@Composable
-fun InfoRow(icon: androidx.compose.ui.graphics.vector.ImageVector, iconColor: androidx.compose.ui.graphics.Color, text: String) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = iconColor,
-            modifier = Modifier.size(20.dp)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(text, style = MaterialTheme.typography.bodyMedium)
     }
 }
 

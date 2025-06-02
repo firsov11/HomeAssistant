@@ -16,7 +16,7 @@ fun SendDeviceDataScreen() {
 
     var deviceId by remember { mutableStateOf("SensorTest") }
     var temperature by remember { mutableStateOf("") }
-    var humidity by remember { mutableStateOf("") }
+    var pressure by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -48,9 +48,9 @@ fun SendDeviceDataScreen() {
             Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedTextField(
-                value = humidity,
-                onValueChange = { humidity = it },
-                label = { Text("Влажность (%)") },
+                value = pressure,
+                onValueChange = { pressure = it },
+                label = { Text("Давление (мм рт. ст.)") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -60,14 +60,14 @@ fun SendDeviceDataScreen() {
             Button(
                 onClick = {
                     val tempValue = temperature.toDoubleOrNull()
-                    val humValue = humidity.toDoubleOrNull()
+                    val humValue = pressure.toDoubleOrNull()
 
                     if (tempValue != null && humValue != null) {
                         val deviceData = mapOf(
                             "device_id" to deviceId,
                             "temperature" to tempValue,
-                            "humidity" to humValue,
-                            "type" to "TEMPERATURE_HUMIDITY",
+                            "pressure" to humValue,
+                            "type" to "PRESSURE",
                             "timestamp" to ServerValue.TIMESTAMP
                         )
                         databaseRef.push().setValue(deviceData)

@@ -4,6 +4,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.firsov.homeassistant.ui.screens.HomeScreen
+import com.firsov.homeassistant.ui.screens.SensorOutScreen
+import com.firsov.homeassistant.ui.screens.SensorPressureScreen
 
 @Composable
 fun AppNavigation(navController: NavHostController, modifier: Modifier = Modifier) {
@@ -14,8 +16,10 @@ fun AppNavigation(navController: NavHostController, modifier: Modifier = Modifie
     ) {
         composable("home") { HomeScreen(navController = navController, hasPresence = true) // или false
         }
-        composable("devices") { DevicesScreen() }
+        composable("radar") { RadarScreen() }
         composable("sensor") { SensorScreen() }
+        composable("sensor_pressure") { SensorPressureScreen() }
+        composable("sensorout") { SensorOutScreen() }
     }
 }
 

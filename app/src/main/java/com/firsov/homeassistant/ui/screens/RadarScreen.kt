@@ -15,14 +15,16 @@ import androidx.compose.material.icons.outlined.SensorsOff
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.material3.ExperimentalMaterial3Api
-
+import kotlin.collections.sortedByDescending
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DevicesScreen(viewModel: RealtimeDatabaseViewModel = viewModel()) {
+fun RadarScreen(viewModel: RealtimeDatabaseViewModel = viewModel()) {
     val devices by viewModel.devices.collectAsState()
-    val radarDevices = devices.filter { it.type == DeviceType.RADAR }
+    val radarDevices = devices
+        .filter { it.type == DeviceType.RADAR }
+        .sortedByDescending { it.human_time }
 
     var radarEnabled by remember { mutableStateOf(true) }
 
@@ -133,12 +135,12 @@ fun DeviceCard(device: DeviceData) {
             )
             InfoRow(
                 icon = if (device.presence) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                iconColor = if (device.presence) colorScheme.primary else colorScheme.outline,
+                iconColor = colorScheme.primary,
                 text = "Присутствие: ${if (device.presence) "Да" else "Нет"}"
             )
             InfoRow(
                 icon = Icons.Default.AccessTime,
-                iconColor = colorScheme.outline,
+                iconColor = colorScheme.primary,
                 text = device.human_time
             )
         }
