@@ -30,7 +30,7 @@ fun RadarScreen(viewModel: RealtimeDatabaseViewModel = viewModel()) {
 
     // Слушаем значение включения радара из Firebase
     LaunchedEffect(Unit) {
-        FirebaseDatabase.getInstance().getReference("device_control/Radar")
+        FirebaseDatabase.getInstance().getReference("device_control/radar")
             .get().addOnSuccessListener { snapshot ->
                 snapshot.getValue(Boolean::class.java)?.let {
                     radarEnabled = it
@@ -48,7 +48,7 @@ fun RadarScreen(viewModel: RealtimeDatabaseViewModel = viewModel()) {
                             val newState = !radarEnabled
                             FirebaseDatabase.getInstance()
                                 .getReference("device_control")
-                                .child("Radar")
+                                .child("radar")
                                 .setValue(newState)
                             radarEnabled = newState
                         }

@@ -3,16 +3,44 @@ package com.firsov.homeassistant.ui.screens
 import DeviceType
 import RealtimeDatabaseViewModel
 import SensorData
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Air
+import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.Thermostat
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.WaterDrop
+import androidx.compose.material.icons.outlined.Block
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -24,19 +52,61 @@ import androidx.navigation.NavController
 @Composable
 fun HomeScreen(
     navController: NavController,
-    hasPresence: Boolean,
     viewModel: RealtimeDatabaseViewModel = viewModel()
 ) {
     val devices by viewModel.devices.collectAsState(initial = emptyList())
+    val deviceControl by viewModel.deviceControl.collectAsState()
+
+    val radarDevices = devices.filter { it.type == DeviceType.RADAR }
+    val latestHumanTime = radarDevices.maxByOrNull { it.human_time }?.human_time ?: ""
+    val radarPresence = radarDevices.any { it.human_time == latestHumanTime && it.presence }
+
     val latestSensor = devices
         .filter { it.type == DeviceType.TEMPERATURE_HUMIDITY }
+        .maxByOrNull { it.human_time }
+
+    val latestSensorOut = devices
+        .filter { it.type == DeviceType.TEMPERATURE_HUMIDITY_OUT }
         .maxByOrNull { it.human_time }
 
     val latestSensorPressure = devices
         .filter { it.type == DeviceType.PRESSURE }
         .maxByOrNull { it.human_time }
 
-    val radarIcon = if (hasPresence) Icons.Filled.Sensors else Icons.Filled.SensorsOff
+    val latestSensorCo = devices
+        .filter { it.type == DeviceType.CO }
+        .maxByOrNull { it.human_time }
+
+    val radarButtonColor = when {
+        !deviceControl.radar -> Color.Gray
+        radarPresence -> MaterialTheme.colorScheme.primaryContainer
+        else -> MaterialTheme.colorScheme.primary
+    }
+
+    val radarContentColor = if (!deviceControl.radar) {
+        Color.DarkGray
+    } else {
+        MaterialTheme.colorScheme.onPrimaryContainer
+    }
+
+    val radarIcon = when {
+        !deviceControl.radar -> Icons.Outlined.Block
+        radarPresence -> Icons.Default.Visibility
+        else -> Icons.Default.VisibilityOff
+    }
+
+    val ventIcon = if (deviceControl.vent) Icons.Default.Air else Icons.Outlined.Block
+
+    val ventButtonColor = when {
+        !deviceControl.vent -> Color.Gray
+        else -> MaterialTheme.colorScheme.primaryContainer
+    }
+
+    val ventContentColor = if (!deviceControl.vent) {
+        Color.DarkGray
+    } else {
+        MaterialTheme.colorScheme.onPrimaryContainer
+    }
 
     Scaffold(
         topBar = {
@@ -94,30 +164,32 @@ fun HomeScreen(
                                     modifier = Modifier
                                         .width(squareSize)
                                         .height(squareSize)
-                                        .padding(4.dp)
+                                        .padding(1.dp)
                                 ) {
                                     Row(modifier = Modifier.fillMaxWidth()) {
-                                        SquareButton(
+                                        RVButton(
+                                            size = squareSize / 2,
+                                            icon = radarIcon,
                                             text = "Радар",
-                                            size = squareSize / 2,
-                                            icon = radarIcon
-                                        ) {
-                                            navController.navigate("radar")
-                                        }
+                                            onClick = { navController.navigate("radar") },
+                                            buttonColor = radarButtonColor,
+                                            contentColor = radarContentColor
+                                        )
 
-                                        SquareButton(
-                                            text = "Вент",
+                                        RVButton(
                                             size = squareSize / 2,
-                                            icon = Icons.Filled.Air
-                                        ) {
-                                            navController.navigate("ventilation")
-                                        }
+                                            icon = ventIcon,
+                                            text = "Вент",
+                                            onClick = { navController.navigate("vent") },
+                                            buttonColor = ventButtonColor,
+                                            contentColor = ventContentColor
+                                        )
                                     }
 
                                     SquareSensorButton(
                                         size = squareSize,
                                         data = listOf(
-                                            SensorData(Icons.Filled.Speed, null, "ppm", "CO")
+                                            SensorData(Icons.Filled.Speed, latestSensorCo?.co, "ppm", "CO")
                                         )
                                     ) {
                                         navController.navigate("co")
@@ -187,13 +259,13 @@ fun HomeScreen(
                                     data = listOf(
                                         SensorData(
                                             Icons.Filled.Thermostat,
-                                            latestSensor?.tempout,
+                                            latestSensorOut?.tempout,
                                             "°C",
                                             "Температура"
                                         ),
                                         SensorData(
                                             Icons.Filled.WaterDrop,
-                                            latestSensor?.humout,
+                                            latestSensorOut?.humout,
                                             "%",
                                             "Влажность"
                                         )
@@ -220,11 +292,13 @@ fun HomeScreen(
 }
 
 @Composable
-fun SquareButton(
-    text: String,
+fun RVButton(
     size: Dp,
     icon: ImageVector,
-    onClick: () -> Unit
+    text: String,
+    onClick: () -> Unit,
+    buttonColor: Color,
+    contentColor: Color
 ) {
     Button(
         onClick = onClick,
@@ -234,8 +308,8 @@ fun SquareButton(
             .padding(4.dp),
         shape = RoundedCornerShape(16.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onBackground
+            containerColor = buttonColor,
+            contentColor = contentColor
         )
     ) {
         Column(
@@ -246,16 +320,20 @@ fun SquareButton(
                 imageVector = icon,
                 contentDescription = text,
                 modifier = Modifier.size(32.dp),
-                tint = MaterialTheme.colorScheme.onPrimary
+                tint = contentColor
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = text,
-                fontSize = 14.sp
+                fontSize = 14.sp,
+                color = contentColor
             )
         }
     }
 }
+
+
+
 
 @Composable
 fun SquareSensorButton(

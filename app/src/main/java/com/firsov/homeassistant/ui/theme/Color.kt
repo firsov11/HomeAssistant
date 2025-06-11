@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.Color
 
 // Тёмная болотная тема
 val DarkPrimary = Color(0xFF7F9D82)
-val DarkSecondary = Color(0xFF3E4B37)
+val DarkSecondary = Color(0xFF3C503C)
 val DarkTertiary = Color(0xFF2F4F2F)
 val DarkBackground = Color(0xFF253825)
 val DarkSurface = Color(0xFF253825)

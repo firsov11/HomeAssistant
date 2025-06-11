@@ -17,13 +17,13 @@ fun AppNavigation(navController: NavHostController, modifier: Modifier = Modifie
         startDestination = "home",
         modifier = modifier
     ) {
-        composable("home") { HomeScreen(navController = navController, hasPresence = true) // или false
+        composable("home") { HomeScreen(navController = navController)
         }
         composable("radar") { RadarScreen() }
         composable("sensor") { SensorScreen() }
         composable("sensor_pressure") { SensorPressureScreen() }
         composable("sensorout") { SensorOutScreen() }
-        composable("ventilation") { VentilationScreen() }
+        composable("vent") { VentilationScreen() }
         composable("co") { SensorCoScreen() }
         composable("send_test") {
             SendDeviceDataScreen(navController)

@@ -18,11 +18,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.Air
 import androidx.compose.material.icons.filled.QrCode2
-import androidx.compose.material.icons.filled.Sensors
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.icons.outlined.SensorsOff
+import androidx.compose.material.icons.outlined.Block
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -56,7 +56,7 @@ fun VentilationScreen(viewModel: RealtimeDatabaseViewModel = viewModel()) {
 
     // Слушаем значение включения радара из Firebase
     LaunchedEffect(Unit) {
-        FirebaseDatabase.getInstance().getReference("device_control/Vent")
+        FirebaseDatabase.getInstance().getReference("device_control/vent")
             .get().addOnSuccessListener { snapshot ->
                 snapshot.getValue(Boolean::class.java)?.let {
                     ventilationEnabled = it
@@ -74,7 +74,7 @@ fun VentilationScreen(viewModel: RealtimeDatabaseViewModel = viewModel()) {
                             val newState = !ventilationEnabled
                             FirebaseDatabase.getInstance()
                                 .getReference("device_control")
-                                .child("Vent")
+                                .child("vent")
                                 .setValue(newState)
                             ventilationEnabled = newState
                         }
@@ -89,7 +89,7 @@ fun VentilationScreen(viewModel: RealtimeDatabaseViewModel = viewModel()) {
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(
-                                    imageVector = if (ventilationEnabled) Icons.Default.Sensors else Icons.Outlined.SensorsOff,
+                                    imageVector = if (ventilationEnabled) Icons.Default.Air else Icons.Outlined.Block,
                                     contentDescription = null,
                                     modifier = Modifier.size(20.dp)
                                 )
