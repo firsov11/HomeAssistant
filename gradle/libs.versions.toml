@@ -16,6 +16,9 @@ workVersion = "2.9.0"
 accompanist = "0.34.0"
 material = "1.11.0"
 materialIcons = "1.5.4"
+mpandroidchart = "3.1.0"
+retrofit = "2.9.0"
+gson = "2.10.1"
 
 [libraries]
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "bomVersion" }
@@ -28,6 +31,9 @@ androidx-navigation = { group = "androidx.navigation", name = "navigation-compos
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 accompanist-navigation-animation = { group = "com.google.accompanist", name = "accompanist-navigation-animation", version.ref = "accompanist" }
 androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "materialIcons" }
+mpandroidchart = { group = "com.github.PhilJay", name = "MPAndroidChart", version.ref = "mpandroidchart" }
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+retrofit-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
 
 
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }

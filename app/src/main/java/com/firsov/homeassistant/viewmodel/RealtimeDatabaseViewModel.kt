@@ -1,5 +1,6 @@
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.firsov.homeassistant.data.DeviceControl
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -7,10 +8,13 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import com.firsov.homeassistant.data.weather.WeatherService
+import com.google.gson.Gson
 
 class RealtimeDatabaseViewModel : ViewModel() {
 
@@ -22,9 +26,16 @@ class RealtimeDatabaseViewModel : ViewModel() {
     private val _deviceControl = MutableStateFlow(DeviceControl())
     val deviceControl: StateFlow<DeviceControl> = _deviceControl
 
+    private val _pressureHistory = MutableStateFlow<List<Pair<String, Float>>>(emptyList())
+    val pressureHistory: StateFlow<List<Pair<String, Float>>> = _pressureHistory
+
+    private val _forecastPressure = MutableStateFlow<List<Pair<String, Float>>>(emptyList())
+    val forecastPressure: StateFlow<List<Pair<String, Float>>> = _forecastPressure
+    
     init {
         observeDevices()
         observeDeviceControl()
+        loadDailyPressureData()
     }
 
     private fun observeDevices() {
@@ -94,6 +105,72 @@ class RealtimeDatabaseViewModel : ViewModel() {
                 Log.e("FirebaseDebug", "Ошибка при получении device_control: ${error.message}")
             }
         })
+    }
+
+    private fun loadDailyPressureData() {
+        database.child("presence_logs").orderByChild("type").equalTo("PRESSURE")
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val entries = mutableListOf<Pair<Long, Float>>()
+
+                    for (entry in snapshot.children) {
+                        val timestamp = entry.child("timestamp").getValue(Long::class.java) ?: continue
+                        val pressure = entry.child("pressure").getValue(Float::class.java) ?: continue
+                        entries.add(timestamp to pressure)
+                    }
+
+                    val sorted = entries.sortedByDescending { it.first }.take(3).reversed()
+
+                    val labeled = sorted.map { (ts, pressure) ->
+                        val label = formatShortDate(ts)
+                        label to pressure
+                    }.toMutableList()
+
+                    _pressureHistory.value = labeled
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("Firebase", "Ошибка при получении давления: ${error.message}")
+                }
+            })
+    }
+
+    fun loadForecast(
+        lat: Double = 49.46,
+        lon: Double = 36.19,
+        apiKey: String
+    ) {
+        viewModelScope.launch {
+            try {
+                val response = WeatherService.api.getForecast(lat, lon, apiKey)
+
+                // Конвертируем hPa → мм рт. ст.
+                val grouped = response.list
+                    .groupBy { formatForecastDay(it.dt) }
+                    .mapValues {
+                        val grndLevel = it.value.first().main.grnd_level
+                        val hpa = grndLevel ?: it.value.first().main.pressure
+                        hpa * 0.750062f
+                    }
+
+                _forecastPressure.value = grouped.entries.map { it.key to it.value }
+                Log.d("Forecast", "Converted forecast (mmHg): ${_forecastPressure.value}")
+            } catch (e: Exception) {
+                Log.e("Forecast", "Ошибка загрузки прогноза", e)
+            }
+        }
+    }
+
+    private fun formatForecastDay(timestamp: Long): String {
+        val date = Date(timestamp * 1000)
+        val format = SimpleDateFormat("d MMMM (прогноз)", Locale("ru"))
+        return format.format(date)
+    }
+
+    private fun formatShortDate(timestamp: Long): String {
+        val date = Date(timestamp)
+        val formatter = SimpleDateFormat("d MMMM", Locale("ru"))
+        return formatter.format(date)
     }
 
     // Форматирование времени для отображения

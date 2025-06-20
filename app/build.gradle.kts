@@ -1,9 +1,18 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.gms)
 }
+
+val localProperties = Properties().apply {
+    load(rootProject.file("local.properties").inputStream())
+}
+val openWeatherApiKey = localProperties.getProperty("OPEN_WEATHER_API_KEY") ?: ""
+
+
 
 android {
     namespace = "com.firsov.homeassistant"
@@ -17,6 +26,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "OPEN_WEATHER_API_KEY", "\"$openWeatherApiKey\"")
     }
 
     buildTypes {
@@ -37,6 +47,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -52,6 +63,9 @@ dependencies {
     implementation(libs.accompanist.navigation.animation)
     implementation(libs.material)
     implementation(libs.androidx.material.icons.extended)
+    implementation(libs.mpandroidchart)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
 
 
     implementation(libs.androidx.core.ktx)
