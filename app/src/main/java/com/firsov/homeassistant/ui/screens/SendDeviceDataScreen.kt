@@ -50,7 +50,8 @@ fun SendDeviceDataScreen(navController: NavController) {
     var pressure by remember { mutableStateOf("") }
     var co by remember { mutableStateOf("") }
 
-    var presence by remember { mutableStateOf(false) }
+    var radar_alert by remember { mutableStateOf(false) }
+    var co_alert by remember { mutableStateOf(false) }
     var vent by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -177,8 +178,23 @@ fun SendDeviceDataScreen(navController: NavController) {
                 ) {
                     Text("Присутствие обнаружено")
                     Switch(
-                        checked = presence,
-                        onCheckedChange = { presence = it }
+                        checked = radar_alert,
+                        onCheckedChange = { radar_alert = it }
+                    )
+                }
+            }
+
+            if (selectedType == DeviceType.CO) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Угарный газ обнаружен")
+                    Switch(
+                        checked = co_alert,
+                        onCheckedChange = { co_alert = it }
                     )
                 }
             }
@@ -216,7 +232,11 @@ fun SendDeviceDataScreen(navController: NavController) {
                     co.toDoubleOrNull()?.let { deviceData["co"] = it }
 
                     if (selectedType == DeviceType.RADAR) {
-                        deviceData["presence"] = presence
+                        deviceData["radar_alert"] = radar_alert
+                    }
+
+                    if (selectedType == DeviceType.CO) {
+                        deviceData["co_alert"] = co_alert
                     }
 
                     if (selectedType == DeviceType.VENTILATION) {

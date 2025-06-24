@@ -160,9 +160,9 @@ fun VentCard(device: DeviceData) {
                 text = "ID: ${device.device_id}"
             )
             InfoRow(
-                icon = if (device.presence) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                icon = if (device.radar_alert) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                 iconColor = colorScheme.primary,
-                text = "Вентиляция: ${if (device.presence) "Вкл" else "Выкл"}"
+                text = "Вентиляция: ${if (device.radar_alert) "Вкл" else "Выкл"}"
             )
             InfoRow(
                 icon = Icons.Default.AccessTime,

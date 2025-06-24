@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Air
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Sick
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material.icons.filled.Visibility
@@ -47,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.firsov.homeassistant.ui.theme.LocalExtraColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,7 +62,16 @@ fun HomeScreen(
 
     val radarDevices = devices.filter { it.type == DeviceType.RADAR }
     val latestHumanTime = radarDevices.maxByOrNull { it.human_time }?.human_time ?: ""
-    val radarPresence = radarDevices.any { it.human_time == latestHumanTime && it.presence }
+    val radarPresence = radarDevices.any { it.human_time == latestHumanTime && it.radar_alert }
+
+    val latestCoDevice = devices
+        .filter { it.type == DeviceType.CO }
+        .maxByOrNull { it.human_time }
+
+    val coAlert = latestCoDevice?.co_alert == true
+
+
+    val ventColor = LocalExtraColors.current.ventContainer
 
     val latestSensor = devices
         .filter { it.type == DeviceType.TEMPERATURE_HUMIDITY }
@@ -71,10 +83,6 @@ fun HomeScreen(
 
     val latestSensorPressure = devices
         .filter { it.type == DeviceType.PRESSURE }
-        .maxByOrNull { it.human_time }
-
-    val latestSensorCo = devices
-        .filter { it.type == DeviceType.CO }
         .maxByOrNull { it.human_time }
 
     val radarButtonColor = when {
@@ -99,10 +107,28 @@ fun HomeScreen(
 
     val ventButtonColor = when {
         !deviceControl.vent -> Color.Gray
-        else -> MaterialTheme.colorScheme.primaryContainer
+        else -> ventColor
     }
 
     val ventContentColor = if (!deviceControl.vent) {
+        Color.DarkGray
+    } else {
+        MaterialTheme.colorScheme.onPrimaryContainer
+    }
+
+    val sensorCoIcon = when {
+        !deviceControl.sensor_co -> Icons.Outlined.Block
+        coAlert -> Icons.Default.Sick
+        else -> Icons.Default.CheckCircle
+    }
+
+    val coButtonColor = when {
+        !deviceControl.sensor_co -> Color.Gray
+        coAlert -> MaterialTheme.colorScheme.primaryContainer
+        else -> MaterialTheme.colorScheme.primary
+    }
+
+    val coContentColor = if (!deviceControl.sensor_co) {
         Color.DarkGray
     } else {
         MaterialTheme.colorScheme.onPrimaryContainer
@@ -167,7 +193,7 @@ fun HomeScreen(
                                         .padding(1.dp)
                                 ) {
                                     Row(modifier = Modifier.fillMaxWidth()) {
-                                        RVButton(
+                                        RVCoButton(
                                             size = squareSize / 2,
                                             icon = radarIcon,
                                             text = "Радар",
@@ -176,7 +202,7 @@ fun HomeScreen(
                                             contentColor = radarContentColor
                                         )
 
-                                        RVButton(
+                                        RVCoButton(
                                             size = squareSize / 2,
                                             icon = ventIcon,
                                             text = "Вент",
@@ -186,14 +212,14 @@ fun HomeScreen(
                                         )
                                     }
 
-                                    SquareSensorButton(
+                                    RVCoButton(
                                         size = squareSize,
-                                        data = listOf(
-                                            SensorData(Icons.Filled.Speed, latestSensorCo?.co, "ppm", "CO")
-                                        )
-                                    ) {
-                                        navController.navigate("co")
-                                    }
+                                        icon = sensorCoIcon,
+                                        text = "Угарный газ",
+                                        onClick = { navController.navigate("co") },
+                                        buttonColor = coButtonColor,
+                                        contentColor = coContentColor
+                                    )
                                 }
 
                                 SquareSensorButton(
@@ -292,7 +318,7 @@ fun HomeScreen(
 }
 
 @Composable
-fun RVButton(
+fun RVCoButton(
     size: Dp,
     icon: ImageVector,
     text: String,
@@ -331,9 +357,6 @@ fun RVButton(
         }
     }
 }
-
-
-
 
 @Composable
 fun SquareSensorButton(

@@ -103,13 +103,13 @@ fun RadarScreen(viewModel: RealtimeDatabaseViewModel = viewModel()) {
 fun DeviceCard(device: DeviceData) {
     val colorScheme = MaterialTheme.colorScheme
 
-    val containerColor = if (device.presence) {
+    val containerColor = if (device.radar_alert) {
         colorScheme.primaryContainer
     } else {
         colorScheme.secondaryContainer
     }
 
-    val contentColor = if (device.presence) {
+    val contentColor = if (device.radar_alert) {
         colorScheme.onPrimaryContainer
     } else {
         colorScheme.onSecondaryContainer
@@ -134,9 +134,9 @@ fun DeviceCard(device: DeviceData) {
                 text = "ID: ${device.device_id}"
             )
             InfoRow(
-                icon = if (device.presence) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                icon = if (device.radar_alert) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                 iconColor = colorScheme.primary,
-                text = "Присутствие: ${if (device.presence) "Да" else "Нет"}"
+                text = "Присутствие: ${if (device.radar_alert) "Да" else "Нет"}"
             )
             InfoRow(
                 icon = Icons.Default.AccessTime,

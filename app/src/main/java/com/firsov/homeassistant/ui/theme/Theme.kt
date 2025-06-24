@@ -4,15 +4,16 @@ import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
     primary = DarkPrimary,
     secondary = DarkSecondary,
     tertiary = DarkTertiary,
-    primaryContainer = Color(0xFFFF0000),        // добавлено
-    secondaryContainer = DarkSecondary,    // добавлено
+    primaryContainer = Color(0xFFFF0000),
+    secondaryContainer = DarkSecondary,
     background = DarkBackground,
     surface = DarkSurface,
     onPrimary = Color.White,
@@ -26,8 +27,8 @@ private val LightColorScheme = lightColorScheme(
     primary = LightPrimary,
     secondary = LightSecondary,
     tertiary = LightTertiary,
-    primaryContainer = Color(0xFFFF0000),       // добавлено
-    secondaryContainer = LightSecondary,   // добавлено
+    primaryContainer = Color(0xFFFF0000),
+    secondaryContainer = LightSecondary,
     background = LightBackground,
     surface = LightSurface,
     onPrimary = Color.Black,
@@ -36,7 +37,6 @@ private val LightColorScheme = lightColorScheme(
     onBackground = Color(0xFF1C1B1F),
     onSurface = Color(0xFF1C1B1F)
 )
-
 
 @Composable
 fun HomeAssistantTheme(
@@ -49,14 +49,18 @@ fun HomeAssistantTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+    val extraColors = ExtraColors(ventContainer = Color(0xFF008CDC))
+
+    CompositionLocalProvider(LocalExtraColors provides extraColors) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            content = content
+        )
+    }
 }
+

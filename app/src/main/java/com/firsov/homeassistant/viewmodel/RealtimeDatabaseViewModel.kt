@@ -14,7 +14,6 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import com.firsov.homeassistant.data.weather.WeatherService
-import com.google.gson.Gson
 
 class RealtimeDatabaseViewModel : ViewModel() {
 
@@ -53,8 +52,10 @@ class RealtimeDatabaseViewModel : ViewModel() {
                         continue // некорректный тип — пропускаем
                     }
 
-                    val presence = deviceSnapshot.child("presence").getValue(Boolean::class.java) ?: false
+                    val radar_alert = deviceSnapshot.child("radar_alert").getValue(Boolean::class.java) ?: false
                     val vent = deviceSnapshot.child("vent").getValue(Boolean::class.java) ?: false
+                    val co_alert = deviceSnapshot.child("co_alert").getValue(Boolean::class.java) ?: false
+
                     val temperature = deviceSnapshot.child("temperature").getValue(Float::class.java)
                     val humidity = deviceSnapshot.child("humidity").getValue(Float::class.java)
                     val pressure = deviceSnapshot.child("pressure").getValue(Float::class.java)
@@ -67,7 +68,7 @@ class RealtimeDatabaseViewModel : ViewModel() {
 
                     val device = DeviceData(
                         device_id = deviceId,
-                        presence = presence,
+                        radar_alert = radar_alert,
                         vent = vent,
                         temperature = temperature,
                         humidity = humidity,
@@ -76,7 +77,8 @@ class RealtimeDatabaseViewModel : ViewModel() {
                         pressure = pressure,
                         co = co,
                         type = type,
-                        human_time = humanTime
+                        human_time = humanTime,
+                        co_alert = co_alert
                     )
                     deviceList.add(device)
                 }
