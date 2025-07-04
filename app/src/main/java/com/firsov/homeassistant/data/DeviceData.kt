@@ -1,8 +1,6 @@
 
 data class DeviceData(
     val device_id: String,
-    val radar_alert: Boolean = false,
-    val vent: Boolean = false,
     val temperature: Float? = null,
     val humidity: Float? = null,
     val tempout: Float? = null,
@@ -11,5 +9,8 @@ data class DeviceData(
     val type: DeviceType,
     val human_time: String = "",
     val co: Float? = null,
-    val co_alert: Boolean = false
+    val co_a: Boolean = false,
+    val radar_a: Boolean = false,
+    val vent_a: Boolean = false,
+    val timestamp: Long = 0L
 )

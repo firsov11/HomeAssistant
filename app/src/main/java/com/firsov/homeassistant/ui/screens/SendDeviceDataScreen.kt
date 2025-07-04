@@ -52,7 +52,7 @@ fun SendDeviceDataScreen(navController: NavController) {
 
     var radar_alert by remember { mutableStateOf(false) }
     var co_alert by remember { mutableStateOf(false) }
-    var vent by remember { mutableStateOf(false) }
+    var vent_alert by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -208,8 +208,8 @@ fun SendDeviceDataScreen(navController: NavController) {
                 ) {
                     Text("Вентиляция включена")
                     Switch(
-                        checked = vent,
-                        onCheckedChange = { vent = it }
+                        checked = vent_alert,
+                        onCheckedChange = { vent_alert = it }
                     )
                 }
             }
@@ -231,25 +231,47 @@ fun SendDeviceDataScreen(navController: NavController) {
                     pressure.toDoubleOrNull()?.let { deviceData["pressure"] = it }
                     co.toDoubleOrNull()?.let { deviceData["co"] = it }
 
+
+                    // Добавляем флаги только если их тип соответствует
+                    when (selectedType) {
+                        DeviceType.CO -> deviceData["co_alert"] = co_alert
+                        DeviceType.RADAR -> deviceData["radar_alert"] = radar_alert
+                        DeviceType.VENTILATION -> deviceData["vent_alert"] = vent_alert
+                        else -> {}
+                    }
+
+// Отправка в presence_logs
+                    FirebaseDatabase.getInstance()
+                        .getReference("presence_logs")
+                        .push()
+                        .setValue(deviceData)
+
+                    // Обновляем флаг в device_triggered (не затираем другие)
+                    val triggeredUpdate = mutableMapOf<String, Any>()
+
                     if (selectedType == DeviceType.RADAR) {
-                        deviceData["radar_alert"] = radar_alert
+                        triggeredUpdate["radar_alert"] = radar_alert
                     }
-
                     if (selectedType == DeviceType.CO) {
-                        deviceData["co_alert"] = co_alert
+                        triggeredUpdate["co_alert"] = co_alert
                     }
-
                     if (selectedType == DeviceType.VENTILATION) {
-                        deviceData["vent"] = vent
+                        triggeredUpdate["vent_alert"] = vent_alert
                     }
 
-                    databaseRef.push().setValue(deviceData)
+                    if (triggeredUpdate.isNotEmpty()) {
+                        FirebaseDatabase.getInstance()
+                            .getReference("device_triggered")
+                            .updateChildren(triggeredUpdate)
+                    }
+
                     Toast.makeText(context, "✅ Данные отправлены", Toast.LENGTH_SHORT).show()
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("📤 Отправить в Firebase")
             }
+
         }
     }
 }

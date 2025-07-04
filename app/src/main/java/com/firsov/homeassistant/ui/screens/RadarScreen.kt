@@ -22,21 +22,13 @@ import kotlin.collections.sortedByDescending
 @Composable
 fun RadarScreen(viewModel: RealtimeDatabaseViewModel = viewModel()) {
     val devices by viewModel.devices.collectAsState()
+    val deviceControl by viewModel.deviceControl.collectAsState()
+
     val radarDevices = devices
         .filter { it.type == DeviceType.RADAR }
         .sortedByDescending { it.human_time }
 
-    var radarEnabled by remember { mutableStateOf(true) }
-
-    // Слушаем значение включения радара из Firebase
-    LaunchedEffect(Unit) {
-        FirebaseDatabase.getInstance().getReference("device_control/radar")
-            .get().addOnSuccessListener { snapshot ->
-                snapshot.getValue(Boolean::class.java)?.let {
-                    radarEnabled = it
-                }
-            }
-    }
+    val radarEnabled = deviceControl.radar
 
     Scaffold(
         topBar = {
@@ -47,10 +39,8 @@ fun RadarScreen(viewModel: RealtimeDatabaseViewModel = viewModel()) {
                         onClick = {
                             val newState = !radarEnabled
                             FirebaseDatabase.getInstance()
-                                .getReference("device_control")
-                                .child("radar")
+                                .getReference("device_control/radar")
                                 .setValue(newState)
-                            radarEnabled = newState
                         }
                     ) {
                         Surface(
@@ -103,13 +93,13 @@ fun RadarScreen(viewModel: RealtimeDatabaseViewModel = viewModel()) {
 fun DeviceCard(device: DeviceData) {
     val colorScheme = MaterialTheme.colorScheme
 
-    val containerColor = if (device.radar_alert) {
+    val containerColor = if (device.radar_a) {
         colorScheme.primaryContainer
     } else {
         colorScheme.secondaryContainer
     }
 
-    val contentColor = if (device.radar_alert) {
+    val contentColor = if (device.radar_a) {
         colorScheme.onPrimaryContainer
     } else {
         colorScheme.onSecondaryContainer
@@ -134,9 +124,9 @@ fun DeviceCard(device: DeviceData) {
                 text = "ID: ${device.device_id}"
             )
             InfoRow(
-                icon = if (device.radar_alert) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                icon = if (device.radar_a) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                 iconColor = colorScheme.primary,
-                text = "Присутствие: ${if (device.radar_alert) "Да" else "Нет"}"
+                text = "Присутствие: ${if (device.radar_a) "Да" else "Нет"}"
             )
             InfoRow(
                 icon = Icons.Default.AccessTime,
@@ -146,5 +136,6 @@ fun DeviceCard(device: DeviceData) {
         }
     }
 }
+
 
 

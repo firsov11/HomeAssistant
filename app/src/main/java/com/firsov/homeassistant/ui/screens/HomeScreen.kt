@@ -59,19 +59,7 @@ fun HomeScreen(
 ) {
     val devices by viewModel.devices.collectAsState(initial = emptyList())
     val deviceControl by viewModel.deviceControl.collectAsState()
-
-    val radarDevices = devices.filter { it.type == DeviceType.RADAR }
-    val latestHumanTime = radarDevices.maxByOrNull { it.human_time }?.human_time ?: ""
-    val radarPresence = radarDevices.any { it.human_time == latestHumanTime && it.radar_alert }
-
-    val latestCoDevice = devices
-        .filter { it.type == DeviceType.CO }
-        .maxByOrNull { it.human_time }
-
-    val coAlert = latestCoDevice?.co_alert == true
-
-
-    val ventColor = LocalExtraColors.current.ventContainer
+    val deviceTriggered by viewModel.deviceTriggered.collectAsState()
 
     val latestSensor = devices
         .filter { it.type == DeviceType.TEMPERATURE_HUMIDITY }
@@ -85,54 +73,58 @@ fun HomeScreen(
         .filter { it.type == DeviceType.PRESSURE }
         .maxByOrNull { it.human_time }
 
+
+    val radarAlert = deviceTriggered.radar_alert
+    val coAlert = deviceTriggered.co_alert
+    val ventAlert = deviceTriggered.vent_alert
+
+    val ventColor = LocalExtraColors.current.ventContainer
+
     val radarButtonColor = when {
         !deviceControl.radar -> Color.Gray
-        radarPresence -> MaterialTheme.colorScheme.primaryContainer
-        else -> MaterialTheme.colorScheme.primary
+        radarAlert        -> MaterialTheme.colorScheme.primaryContainer
+        else                 -> MaterialTheme.colorScheme.primary
     }
 
-    val radarContentColor = if (!deviceControl.radar) {
-        Color.DarkGray
-    } else {
-        MaterialTheme.colorScheme.onPrimaryContainer
+    val radarContentColor = when {
+        !deviceControl.radar -> Color.DarkGray
+        radarAlert        -> MaterialTheme.colorScheme.onPrimaryContainer
+        else                 -> MaterialTheme.colorScheme.onPrimary
     }
 
     val radarIcon = when {
         !deviceControl.radar -> Icons.Outlined.Block
-        radarPresence -> Icons.Default.Visibility
-        else -> Icons.Default.VisibilityOff
+        radarAlert        -> Icons.Default.Visibility
+        else                 -> Icons.Default.VisibilityOff
     }
 
-    val ventIcon = if (deviceControl.vent) Icons.Default.Air else Icons.Outlined.Block
+    val ventIcon = if (ventAlert) Icons.Default.Air else Icons.Outlined.Block
 
     val ventButtonColor = when {
-        !deviceControl.vent -> Color.Gray
-        else -> ventColor
+        !deviceControl.vent      -> Color.Gray
+        ventAlert                -> ventColor
+        else                     -> MaterialTheme.colorScheme.primary
     }
 
-    val ventContentColor = if (!deviceControl.vent) {
-        Color.DarkGray
-    } else {
-        MaterialTheme.colorScheme.onPrimaryContainer
-    }
+    val ventContentColor = if (!deviceControl.vent) Color.DarkGray else MaterialTheme.colorScheme.onPrimaryContainer
 
-    val sensorCoIcon = when {
+    val coIcon = when {
         !deviceControl.sensor_co -> Icons.Outlined.Block
-        coAlert -> Icons.Default.Sick
-        else -> Icons.Default.CheckCircle
+        coAlert                  -> Icons.Default.Sick
+        else                     -> Icons.Default.CheckCircle
     }
 
     val coButtonColor = when {
         !deviceControl.sensor_co -> Color.Gray
-        coAlert -> MaterialTheme.colorScheme.primaryContainer
-        else -> MaterialTheme.colorScheme.primary
+        coAlert                  -> MaterialTheme.colorScheme.primaryContainer
+        else                     -> MaterialTheme.colorScheme.primary
     }
 
-    val coContentColor = if (!deviceControl.sensor_co) {
-        Color.DarkGray
-    } else {
-        MaterialTheme.colorScheme.onPrimaryContainer
-    }
+    val coContentColor = if (!deviceControl.sensor_co) Color.DarkGray else MaterialTheme.colorScheme.onPrimaryContainer
+
+    // 🔽 Здесь можешь продолжать UI: Scaffold, карточки, кнопки и т.д.
+
+
 
     Scaffold(
         topBar = {
@@ -214,7 +206,7 @@ fun HomeScreen(
 
                                     RVCoButton(
                                         size = squareSize,
-                                        icon = sensorCoIcon,
+                                        icon = coIcon,
                                         text = "Угарный газ",
                                         onClick = { navController.navigate("co") },
                                         buttonColor = coButtonColor,

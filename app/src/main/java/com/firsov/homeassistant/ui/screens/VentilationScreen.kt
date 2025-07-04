@@ -32,37 +32,28 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.firsov.homeassistant.ui.theme.LocalExtraColors
 import com.google.firebase.database.FirebaseDatabase
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VentilationScreen(viewModel: RealtimeDatabaseViewModel = viewModel()) {
     val devices by viewModel.devices.collectAsState()
+    val deviceControl by viewModel.deviceControl.collectAsState()
+
     val ventilationDevices = devices
         .filter { it.type == DeviceType.VENTILATION }
         .sortedByDescending { it.human_time }
 
-    var ventilationEnabled by remember { mutableStateOf(true) }
+    val ventilationEnabled = deviceControl.vent
 
-    // Слушаем значение включения радара из Firebase
-    LaunchedEffect(Unit) {
-        FirebaseDatabase.getInstance().getReference("device_control/vent")
-            .get().addOnSuccessListener { snapshot ->
-                snapshot.getValue(Boolean::class.java)?.let {
-                    ventilationEnabled = it
-                }
-            }
-    }
+
 
     Scaffold(
         topBar = {
@@ -76,7 +67,6 @@ fun VentilationScreen(viewModel: RealtimeDatabaseViewModel = viewModel()) {
                                 .getReference("device_control")
                                 .child("vent")
                                 .setValue(newState)
-                            ventilationEnabled = newState
                         }
                     ) {
                         Surface(
@@ -124,18 +114,18 @@ fun VentilationScreen(viewModel: RealtimeDatabaseViewModel = viewModel()) {
     }
 }
 
-
 @Composable
 fun VentCard(device: DeviceData) {
     val colorScheme = MaterialTheme.colorScheme
+    val ventColor = LocalExtraColors.current.ventContainer
 
-    val containerColor = if (device.vent) {
-        colorScheme.primaryContainer
+    val containerColor = if (device.vent_a) {
+        ventColor
     } else {
         colorScheme.secondaryContainer
     }
 
-    val contentColor = if (device.vent) {
+    val contentColor = if (device.vent_a) {
         colorScheme.onPrimaryContainer
     } else {
         colorScheme.onSecondaryContainer
@@ -160,9 +150,9 @@ fun VentCard(device: DeviceData) {
                 text = "ID: ${device.device_id}"
             )
             InfoRow(
-                icon = if (device.radar_alert) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                icon = if (device.vent_a) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                 iconColor = colorScheme.primary,
-                text = "Вентиляция: ${if (device.radar_alert) "Вкл" else "Выкл"}"
+                text = "Вентиляция: ${if (device.vent_a) "Вкл" else "Выкл"}"
             )
             InfoRow(
                 icon = Icons.Default.AccessTime,

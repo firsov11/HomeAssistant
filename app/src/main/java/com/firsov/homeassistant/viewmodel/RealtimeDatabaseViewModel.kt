@@ -2,6 +2,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.firsov.homeassistant.data.DeviceControl
+import com.firsov.homeassistant.data.DeviceTriggered
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -25,15 +26,28 @@ class RealtimeDatabaseViewModel : ViewModel() {
     private val _deviceControl = MutableStateFlow(DeviceControl())
     val deviceControl: StateFlow<DeviceControl> = _deviceControl
 
+    private val _deviceTriggered = MutableStateFlow(DeviceTriggered())
+    val deviceTriggered: StateFlow<DeviceTriggered> = _deviceTriggered
+
     private val _pressureHistory = MutableStateFlow<List<Pair<String, Float>>>(emptyList())
     val pressureHistory: StateFlow<List<Pair<String, Float>>> = _pressureHistory
 
     private val _forecastPressure = MutableStateFlow<List<Pair<String, Float>>>(emptyList())
     val forecastPressure: StateFlow<List<Pair<String, Float>>> = _forecastPressure
-    
+
+    private val _coAlert = MutableStateFlow(false)
+    val coAlert: StateFlow<Boolean> = _coAlert
+
+    private val _radarAlert = MutableStateFlow(false)
+    val radarAlert: StateFlow<Boolean> = _radarAlert
+
+    private val _ventAlert = MutableStateFlow(false)
+    val ventAlert: StateFlow<Boolean> = _ventAlert
+
     init {
         observeDevices()
         observeDeviceControl()
+        observeDeviceTriggered()
         loadDailyPressureData()
     }
 
@@ -52,10 +66,6 @@ class RealtimeDatabaseViewModel : ViewModel() {
                         continue // некорректный тип — пропускаем
                     }
 
-                    val radar_alert = deviceSnapshot.child("radar_alert").getValue(Boolean::class.java) ?: false
-                    val vent = deviceSnapshot.child("vent").getValue(Boolean::class.java) ?: false
-                    val co_alert = deviceSnapshot.child("co_alert").getValue(Boolean::class.java) ?: false
-
                     val temperature = deviceSnapshot.child("temperature").getValue(Float::class.java)
                     val humidity = deviceSnapshot.child("humidity").getValue(Float::class.java)
                     val pressure = deviceSnapshot.child("pressure").getValue(Float::class.java)
@@ -63,22 +73,27 @@ class RealtimeDatabaseViewModel : ViewModel() {
                     val humout = deviceSnapshot.child("humout").getValue(Float::class.java)
                     val co = deviceSnapshot.child("co").getValue(Float::class.java)
 
+                    val coAlert = deviceSnapshot.child("co_alert").getValue(Boolean::class.java) ?: false
+                    val radarAlert = deviceSnapshot.child("radar_alert").getValue(Boolean::class.java) ?: false
+
+                    val ventAlert = deviceSnapshot.child("vent_alert").getValue(Boolean::class.java) ?: false
+
                     val timestamp = deviceSnapshot.child("timestamp").getValue(Long::class.java) ?: 0L
                     val humanTime = formatTimestamp(timestamp)
 
                     val device = DeviceData(
                         device_id = deviceId,
-                        radar_alert = radar_alert,
-                        vent = vent,
                         temperature = temperature,
                         humidity = humidity,
                         tempout = tempout,
                         humout = humout,
                         pressure = pressure,
                         co = co,
+                        co_a = coAlert,
+                        radar_a = radarAlert,
+                        vent_a = ventAlert,
                         type = type,
-                        human_time = humanTime,
-                        co_alert = co_alert
+                        human_time = humanTime
                     )
                     deviceList.add(device)
                 }
@@ -91,6 +106,7 @@ class RealtimeDatabaseViewModel : ViewModel() {
             }
         })
     }
+
 
     private fun observeDeviceControl() {
         database.child("device_control").addValueEventListener(object : ValueEventListener {
@@ -108,6 +124,25 @@ class RealtimeDatabaseViewModel : ViewModel() {
             }
         })
     }
+
+    private fun observeDeviceTriggered() {
+        database.child("device_triggered").addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val triggered = snapshot.getValue(DeviceTriggered::class.java)
+                if (triggered != null) {
+                    _deviceTriggered.value = triggered
+                    Log.d("FirebaseDebug", "DeviceTriggered updated: $triggered")
+                } else {
+                    Log.w("FirebaseDebug", "DeviceTriggered is null")
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("FirebaseDebug", "Ошибка при получении device_triggered: ${error.message}")
+            }
+        })
+    }
+
 
     private fun loadDailyPressureData() {
         database.child("presence_logs").orderByChild("type").equalTo("PRESSURE")

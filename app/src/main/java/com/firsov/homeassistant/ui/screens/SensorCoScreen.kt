@@ -1,5 +1,6 @@
 package com.firsov.homeassistant.ui.screens
 
+import DeviceCard
 import DeviceData
 import DeviceType
 import InfoRow
@@ -47,23 +48,13 @@ import com.google.firebase.database.FirebaseDatabase
 @Composable
 fun SensorCoScreen(viewModel: RealtimeDatabaseViewModel = viewModel()) {
     val devices by viewModel.devices.collectAsState()
+    val deviceControl by viewModel.deviceControl.collectAsState()
+
     val coDevices = devices
-        .filter { it.type == DeviceType.CO}
+        .filter { it.type == DeviceType.CO }
         .sortedByDescending { it.human_time }
 
-
-
-
-    var sensorCoEnabled by remember { mutableStateOf(true) }
-
-    LaunchedEffect(Unit) {
-        FirebaseDatabase.getInstance().getReference("device_control/sensor_co")
-            .get().addOnSuccessListener { snapshot ->
-                snapshot.getValue(Boolean::class.java)?.let {
-                    sensorCoEnabled = it
-                }
-            }
-    }
+    val sensorCoEnabled = deviceControl.sensor_co
 
     Scaffold(
         topBar = {
@@ -77,7 +68,6 @@ fun SensorCoScreen(viewModel: RealtimeDatabaseViewModel = viewModel()) {
                                 .getReference("device_control")
                                 .child("sensor_co")
                                 .setValue(newState)
-                            sensorCoEnabled = newState
                         }
                     ) {
                         Surface(
@@ -120,6 +110,8 @@ fun SensorCoScreen(viewModel: RealtimeDatabaseViewModel = viewModel()) {
                 items(coDevices) { device ->
                     CoCard(device)
                 }
+
+
             }
         }
     }
@@ -129,13 +121,13 @@ fun SensorCoScreen(viewModel: RealtimeDatabaseViewModel = viewModel()) {
 fun CoCard(device: DeviceData) {
     val colorScheme = MaterialTheme.colorScheme
 
-    val containerColor = if (device.co_alert) {
+    val containerColor = if (device.co_a) {
         colorScheme.primaryContainer
     } else {
         colorScheme.secondaryContainer
     }
 
-    val contentColor = if (device.co_alert) {
+    val contentColor = if (device.co_a) {
         colorScheme.onPrimaryContainer
     } else {
         colorScheme.onSecondaryContainer
@@ -145,7 +137,7 @@ fun CoCard(device: DeviceData) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp),
-        color = containerColor, // ✅ применяем вычисленный цвет
+        color = containerColor,
         contentColor = contentColor,
         shape = RoundedCornerShape(16.dp),
         tonalElevation = 3.dp
@@ -172,4 +164,5 @@ fun CoCard(device: DeviceData) {
         }
     }
 }
+
 
