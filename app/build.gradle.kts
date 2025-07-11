@@ -66,6 +66,7 @@ dependencies {
     implementation(libs.mpandroidchart)
     implementation(libs.retrofit)
     implementation(libs.retrofit.gson)
+    implementation(libs.androidx.datastore.preferences)
 
 
     implementation(libs.androidx.core.ktx)

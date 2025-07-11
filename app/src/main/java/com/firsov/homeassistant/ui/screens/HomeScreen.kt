@@ -35,7 +35,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -44,12 +43,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.firsov.homeassistant.ui.components.SettingsMenu
 import com.firsov.homeassistant.ui.theme.LocalExtraColors
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,6 +62,8 @@ fun HomeScreen(
     val devices by viewModel.devices.collectAsState(initial = emptyList())
     val deviceControl by viewModel.deviceControl.collectAsState()
     val deviceTriggered by viewModel.deviceTriggered.collectAsState()
+
+    val context = LocalContext.current
 
     val latestSensor = devices
         .filter { it.type == DeviceType.TEMPERATURE_HUMIDITY }
@@ -98,7 +102,11 @@ fun HomeScreen(
         else                 -> Icons.Default.VisibilityOff
     }
 
-    val ventIcon = if (ventAlert) Icons.Default.Air else Icons.Outlined.Block
+    val ventIcon = when {
+        !deviceControl.vent -> Icons.Outlined.Block
+        ventAlert        -> Icons.Default.Air
+        else                 -> Icons.Outlined.Block
+    }
 
     val ventButtonColor = when {
         !deviceControl.vent      -> Color.Gray
@@ -122,21 +130,20 @@ fun HomeScreen(
 
     val coContentColor = if (!deviceControl.sensor_co) Color.DarkGray else MaterialTheme.colorScheme.onPrimaryContainer
 
-    // 🔽 Здесь можешь продолжать UI: Scaffold, карточки, кнопки и т.д.
-
-
-
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Домашний ассистент") },
                 actions = {
-                    TextButton(onClick = { navController.navigate("send_test") }) {
-                        Text("Тест", color = MaterialTheme.colorScheme.onPrimary)
-                    }
+                    SettingsMenu(
+                        context = context,
+                        navController = navController
+                    )
+
                 }
             )
-        }
+        },
+
     ) { paddingValues ->
         BoxWithConstraints(
             modifier = Modifier
